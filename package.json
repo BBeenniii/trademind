@@ -1,0 +1,15 @@
+{
+  "name": "trademind-ai",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "db:up": "docker compose up -d postgres",
+    "fire-up": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/trademind.ps1 fire-up",
+    "status": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/trademind.ps1 status",
+    "stop": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/trademind.ps1 stop",
+    "install-command": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/trademind.ps1 install-command",
+    "api:dev": "npm --prefix apps/api run start:dev",
+    "frontend:dev": "npm --prefix apps/frontend run dev",
+    "ml:dev": "cd apps/ml-service && uvicorn main:app --reload --port 8000"
+  }
+}

@@ -1,0 +1,235 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model MarketData {
+  id        Int      @id @default(autoincrement())
+  pair      String
+  timestamp DateTime
+  open      Float
+  high      Float
+  low       Float
+  close     Float
+  volume    Float?
+  source    String?
+  createdAt DateTime @default(now())
+
+  @@index([pair, timestamp])
+}
+
+model Signal {
+  id              Int              @id @default(autoincrement())
+  pair            String
+  timestamp       DateTime
+  signal          String
+  confidence      Float
+  closePrice      Float
+  rsi             Float?
+  smaFast         Float?
+  smaSlow         Float?
+  volatility      Float?
+  momentum        Float?
+  returnPct       Float?
+  reason          String?
+  source          String?
+  modelVersionId  Int?
+  modelVersion    ModelVersion?    @relation(fields: [modelVersionId], references: [id], onDelete: SetNull)
+  feedbackRecords FeedbackRecord[]
+  paperPositions  PaperPosition[]
+  trades          Trade[]
+  createdAt       DateTime         @default(now())
+
+  @@index([pair, timestamp])
+  @@index([modelVersionId])
+}
+
+model BacktestRun {
+  id                 Int       @id @default(autoincrement())
+  pair               String
+  startDate          DateTime?
+  endDate            DateTime?
+  initialBalance     Float
+  finalBalance       Float
+  totalReturn        Float
+  winRate            Float
+  maxDrawdown        Float
+  tradeCount         Int
+  averageTradeReturn Float?
+  bestTrade          Float?
+  worstTrade         Float?
+  equityCurve        Json?
+  drawdownCurve      Json?
+  createdAt          DateTime  @default(now())
+  trades             Trade[]
+}
+
+model Trade {
+  id              Int              @id @default(autoincrement())
+  backtestRunId   Int?
+  backtestRun     BacktestRun?     @relation(fields: [backtestRunId], references: [id], onDelete: Cascade)
+  paperAccountId  Int?
+  paperAccount    PaperAccount?    @relation(fields: [paperAccountId], references: [id], onDelete: Cascade)
+  signalId        Int?
+  signal          Signal?          @relation(fields: [signalId], references: [id], onDelete: SetNull)
+  pair            String
+  entryTime       DateTime
+  exitTime        DateTime?
+  direction       String
+  entryPrice      Float
+  exitPrice       Float?
+  size            Float?
+  pnl             Float?
+  pnlPercent      Float?
+  closeReason     String?
+  mode            String           @default("BACKTEST")
+  feedbackRecords FeedbackRecord[]
+  createdAt       DateTime         @default(now())
+
+  @@index([signalId])
+}
+
+// Simulation-only balance state. No broker account or execution credential is stored.
+model PaperAccount {
+  id              Int             @id @default(autoincrement())
+  name            String          @default("Demo Paper Account")
+  startingBalance Float
+  cashBalance     Float
+  equity          Float
+  realizedPnl     Float           @default(0)
+  unrealizedPnl   Float           @default(0)
+  isActive        Boolean         @default(true)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  positions       PaperPosition[]
+  trades          Trade[]
+}
+
+// Open and closed positions produced by the local paper-trading engine.
+model PaperPosition {
+  id            Int          @id @default(autoincrement())
+  accountId     Int
+  account       PaperAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  signalId      Int?
+  signal        Signal?      @relation(fields: [signalId], references: [id], onDelete: SetNull)
+  pair          String
+  direction     String
+  entryTime     DateTime
+  entryPrice    Float
+  size          Float
+  stopLoss      Float?
+  takeProfit    Float?
+  currentPrice  Float?
+  unrealizedPnl Float        @default(0)
+  status        String       @default("OPEN")
+  exitTime      DateTime?
+  exitPrice     Float?
+  realizedPnl   Float?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@index([pair, status])
+  @@index([signalId])
+}
+
+model Alert {
+  id        Int      @id @default(autoincrement())
+  type      String
+  severity  String
+  message   String
+  status    String   @default("CREATED")
+  createdAt DateTime @default(now())
+}
+
+model AiSummary {
+  id        Int      @id @default(autoincrement())
+  pair      String
+  content   String
+  source    String
+  createdAt DateTime @default(now())
+}
+
+// Champion/challenger metadata keeps model promotion explicit and reviewable.
+model ModelVersion {
+  id                Int              @id @default(autoincrement())
+  version           String           @unique
+  status            String
+  modelType         String
+  trainedAt         DateTime         @default(now())
+  trainedUntil      DateTime?
+  trainingSamples   Int
+  validationSamples Int?
+  accuracy          Float?
+  precision         Float?
+  recall            Float?
+  f1Score           Float?
+  winRate           Float?
+  avgPnl            Float?
+  maxDrawdown       Float?
+  profitFactor      Float?
+  notes             String?
+  artifactPath      String?
+  datasetSource     String?
+  timeframe         String?
+  trainingRows      Int?
+  validationRows    Int?
+  testRows          Int?
+  featureImportance Json?
+  classDistribution Json?
+  trainingTimeSecs  Float?
+  signals           Signal[]
+  feedbackRecords   FeedbackRecord[]
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+}
+
+// Links a paper-trade outcome back to the signal context that produced it.
+model FeedbackRecord {
+  id               Int           @id @default(autoincrement())
+  signalId         Int?
+  sourceSignal     Signal?       @relation(fields: [signalId], references: [id], onDelete: SetNull)
+  modelVersionId   Int?
+  modelVersion     ModelVersion? @relation(fields: [modelVersionId], references: [id], onDelete: SetNull)
+  tradeId          Int?          @unique
+  trade            Trade?        @relation(fields: [tradeId], references: [id], onDelete: SetNull)
+  pair             String
+  signalValue      String
+  confidence       Float
+  closePrice       Float
+  rsi              Float?
+  smaFast          Float?
+  smaSlow          Float?
+  volatility       Float?
+  momentum         Float?
+  returnPct        Float?
+  outcome          String
+  pnl              Float?
+  pnlPercent       Float?
+  holdingSeconds   Int?
+  maxFavorableMove Float?
+  maxAdverseMove   Float?
+  createdAt        DateTime      @default(now())
+
+  @@index([pair, createdAt])
+  @@index([modelVersionId])
+  @@index([outcome])
+}
+
+model ModelTrainingRun {
+  id                 Int       @id @default(autoincrement())
+  startedAt          DateTime  @default(now())
+  finishedAt         DateTime?
+  status             String
+  trigger            String
+  samplesUsed        Int?
+  previousChampionId Int?
+  challengerVersion  String?
+  promoted           Boolean   @default(false)
+  metricsJson        Json?
+  errorMessage       String?
+  createdAt          DateTime  @default(now())
+}

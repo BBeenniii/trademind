@@ -1,0 +1,177 @@
+# =========================
+# Dependencies
+# =========================
+node_modules/
+**/node_modules/
+
+# Python virtual environments
+.venv/
+venv/
+env/
+ENV/
+apps/ml-service/.venv/
+apps/ml-service/venv/
+
+# =========================
+# Environment / secrets
+# =========================
+.env
+.env.*
+!.env.example
+
+apps/api/.env
+apps/api/.env.*
+!apps/api/.env.example
+
+apps/frontend/.env
+apps/frontend/.env.*
+!apps/frontend/.env.example
+
+apps/ml-service/.env
+apps/ml-service/.env.*
+!apps/ml-service/.env.example
+
+# API keys / secret dumps
+*.key
+*.pem
+*.p12
+*.crt
+secrets/
+credentials/
+tokens/
+
+# =========================
+# Build outputs
+# =========================
+dist/
+build/
+out/
+.next/
+.turbo/
+coverage/
+
+apps/api/dist/
+apps/frontend/dist/
+apps/frontend/build/
+
+# =========================
+# Logs
+# =========================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# =========================
+# Python cache / generated files
+# =========================
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# =========================
+# ML model artifacts
+# =========================
+*.joblib
+*.pkl
+*.pickle
+*.h5
+*.onnx
+*.pt
+*.pth
+*.model
+*.bin
+
+apps/ml-service/models/*
+!apps/ml-service/models/.gitkeep
+
+# =========================
+# Datasets / generated market data
+# =========================
+*.csv
+*.parquet
+*.feather
+*.hdf
+*.h5
+*.jsonl
+
+apps/ml-service/data/raw/*
+apps/ml-service/data/processed/*
+apps/ml-service/data/cache/*
+apps/ml-service/data/tmp/*
+apps/ml-service/data/downloads/*
+
+!apps/ml-service/data/raw/.gitkeep
+!apps/ml-service/data/processed/.gitkeep
+!apps/ml-service/data/cache/.gitkeep
+!apps/ml-service/data/tmp/.gitkeep
+!apps/ml-service/data/downloads/.gitkeep
+
+# Optional: allow tiny sample data only if you decide to keep it
+# !apps/ml-service/data/sample/
+# !apps/ml-service/data/sample/*.csv
+
+# =========================
+# Database / local storage
+# =========================
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+postgres-data/
+pgdata/
+data/postgres/
+
+# Prisma generated/dev artifacts if any
+apps/api/prisma/dev.db
+apps/api/prisma/dev.db-journal
+apps/api/generated/
+
+# =========================
+# OS / editor files
+# =========================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.example.json
+
+.idea/
+
+# =========================
+# Package manager cache
+# =========================
+.npm/
+.pnpm-store/
+.yarn/
+.yarn-cache/
+
+# =========================
+# Temporary / archive files
+# =========================
+tmp/
+temp/
+.cache/
+!apps/ml-service/data/tmp/
+!apps/ml-service/data/tmp/.gitkeep
+*.zip
+*.rar
+*.7z
+*.tar
+*.tar.gz
+
+# =========================
+# Project docs generated manually
+# =========================
+README.md
+docs/screenshots/*
+!docs/screenshots/.gitkeep

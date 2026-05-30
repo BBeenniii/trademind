@@ -1,0 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color: #e7edf5;
+  background: #0b0f14;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background:
+    linear-gradient(180deg, rgba(56, 211, 159, 0.06), transparent 320px),
+    #0b0f14;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.chart-grid text {
+  fill: #8d9aab;
+}
